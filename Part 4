@@ -1,0 +1,73 @@
+import numpy as np
+
+# Creating custom alphabet for the mod 29 requirement
+alph_29 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#"
+char_to_num = {c: i for i, c in enumerate(alph_29)}
+num_to_char = {i: c for i, c in enumerate(alph_29)}
+
+# Converts text to 2x1 blocks
+def text_to_blocks(text, block_size=2):
+    text = text.upper().replace(' ', '#')
+    for ch in text:
+        if ch not in alph_29:
+            print(f"Character '{ch}' not in allowed 29-letter alphabet.")
+    if len(text) % block_size != 0:
+        text += 'X'  # pad with 'X'
+    blocks = []
+    for i in range(0, len(text), block_size):
+        vec = [[char_to_num[text[i + j]]] for j in range(block_size)]
+        blocks.append(np.array(vec))
+    return blocks
+
+
+# Converts 2x1 blocks back to text
+def blocks_to_text(blocks, mod):
+    text = ""
+    for block in blocks:
+        for val in block:
+            val = int(val[0]) % mod  # mod must match alphabet size (29 here)
+            text += num_to_char[val]
+    return text
+
+
+# Modular inverse for 2x2 matrix
+def modinv_2x2(matrix, mod):
+    det = int(round(np.linalg.det(matrix))) % mod
+    det_inv = pow(det, -1, mod)
+    adj = np.array([[matrix[1][1], -matrix[0][1]],
+                    [-matrix[1][0], matrix[0][0]]])
+    return (det_inv * adj) % mod
+
+
+def multi_step_encode(message, matrices, moduli):
+    blocks = text_to_blocks(message, block_size=2)
+    encoded_blocks = []
+    for block in blocks:
+        for i in range(len(matrices)):
+            block = np.dot(matrices[i], block) % moduli[i]
+        encoded_blocks.append(block)
+    return blocks_to_text(encoded_blocks, moduli[-1])  # final modulus used for encoding
+
+def multi_step_decode(encoded_message, matrices, moduli):
+    blocks = text_to_blocks(encoded_message, block_size=2)
+    decoded_blocks = []
+    for block in blocks:
+        for i in reversed(range(len(matrices))):
+            inv_matrix = modinv_2x2(matrices[i], moduli[i])
+            block = np.dot(inv_matrix, block) % moduli[i]
+            if i > 0:
+                block = block % moduli[i - 1]
+        decoded_blocks.append(block)
+    return blocks_to_text(decoded_blocks, 29)
+  # starting modulus used for decoding
+    
+# Example usage
+message = "A RANDOM MESSAGE"
+matrices = [np.array([[3, 11], [4, 15]]), np.array([[10, 15], [5, 9]])]
+moduli = [26, 29]
+
+encoded_message = multi_step_encode(message, matrices, moduli)
+decoded_message = multi_step_decode(encoded_message, matrices, moduli)
+
+print(f"Encoded message: {encoded_message}")
+print(f"Decoded message: {decoded_message.replace('#', ' ')}")
