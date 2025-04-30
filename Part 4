@@ -2,8 +2,8 @@ import numpy as np
 
 # Creating custom alphabet for the mod 29 requirement
 alph_29 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#"
-char_to_num = {c: i for i, c in enumerate(alph_29)}
-num_to_char = {i: c for i, c in enumerate(alph_29)}
+char_to_num29 = {c: i for i, c in enumerate(alph_29)}
+num_to_char29 = {i: c for i, c in enumerate(alph_29)}
 
 # Converts text to 2x1 blocks
 def text_to_blocks(text, block_size=2):
@@ -62,7 +62,7 @@ def multi_step_decode(encoded_message, matrices, moduli):
   # starting modulus used for decoding
     
 # Example usage
-message = "A RANDOM MESSAGE"
+message = "SEND"
 matrices = [np.array([[3, 11], [4, 15]]), np.array([[10, 15], [5, 9]])]
 moduli = [26, 29]
 
