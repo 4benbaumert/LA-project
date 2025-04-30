@@ -2,12 +2,13 @@ import numpy as np
 
 # Creating custom alphabet for the mod 29 requirement
 alph_29 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#"
-char_to_num29 = {c: i for i, c in enumerate(alph_29)}
-num_to_char29 = {i: c for i, c in enumerate(alph_29)}
+char_to_num = {c: i for i, c in enumerate(alph_29)}
+num_to_char = {i: c for i, c in enumerate(alph_29)}
 
 # Converts text to 2x1 blocks
 def text_to_blocks(text, block_size=2):
     text = text.upper().replace(' ', '#')
+    
     for ch in text:
         if ch not in alph_29:
             print(f"Character '{ch}' not in allowed 29-letter alphabet.")
@@ -33,6 +34,9 @@ def blocks_to_text(blocks, mod):
 # Modular inverse for 2x2 matrix
 def modinv_2x2(matrix, mod):
     det = int(round(np.linalg.det(matrix))) % mod
+    if np.gcd(det, mod) != 1:
+        error = print("Invalid matrix, noninvertible.")
+        return error
     det_inv = pow(det, -1, mod)
     adj = np.array([[matrix[1][1], -matrix[0][1]],
                     [-matrix[1][0], matrix[0][0]]])
@@ -71,3 +75,7 @@ decoded_message = multi_step_decode(encoded_message, matrices, moduli)
 
 print(f"Encoded message: {encoded_message}")
 print(f"Decoded message: {decoded_message.replace('#', ' ')}")
+print("\n")
+print("Using multiple matrices enhances the security by increasing the amount of channels that must be cracked before the original message is revealed. It is much like using multiple ciphers on a message before it being sent. The message cracker must figure out 2 different moduli instead of just 1, doubling the effort it takes to decode the message")
+print("\n")
+print("A matrix may be noninvertable for multiple reasons: its determinant is 0, it has a 0 eigenvalue, the matrix is not square, the rows or columns are linearly dependant, or Ax=0 has nontrivial solutions. My code does check for invertability in the matrix using a quick determinant check, which will fail with a noninvertable matrix and return an error.")
